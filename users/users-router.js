@@ -27,7 +27,7 @@ router.post('/users', async (req, res, next) => {
 
     const newUser = await Users.add({
       username,
-      // hash the password with a time complexity of "14"
+
       password: await bcrypt.hash(password, 14),
     })
 
@@ -48,7 +48,6 @@ router.post('/login', async (req, res, next) => {
       })
     }
 
-    // hash the password again and see if it matches what we have in the database
     const passwordValid = await bcrypt.compare(password, user.password)
 
     if (!passwordValid) {
@@ -57,13 +56,10 @@ router.post('/login', async (req, res, next) => {
       })
     }
 
-    // generate a new session for this user,
-    // and sends back a session ID
-    //req.session.user = user
     const payload = {
       userId: user.id,
       username: user.username,
-      userRole: 'normal', // this value would usually come from the database
+      userRole: 'normal',
     }
 
     res.cookie('token', jwt.sign(payload, process.env.JWT_SECRET))
@@ -77,9 +73,6 @@ router.post('/login', async (req, res, next) => {
 
 router.get('/logout', async (req, res, next) => {
   try {
-    // this will delete the session in the database and try to expire the cookie,
-    // though it's ultimately up to the client if they delete the cookie or not.
-    // but it becomes useless to them once the session is deleted server-side.
     req.session.destroy(err => {
       if (err) {
         next(err)
